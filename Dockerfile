@@ -1,5 +1,6 @@
 FROM python:alpine
 COPY app.py /app/ 
+COPY greetings.txt /app/
 COPY requirements.txt /app/
 WORKDIR /app
 RUN apk add --no-cache git

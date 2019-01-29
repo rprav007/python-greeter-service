@@ -1,26 +1,13 @@
 #!flask/bin/python
-from flask import Flask
+from flask import Flask, request
 from flask_prometheus import monitor
 from opentracing.ext import tags
 from opentracing.propagation import Format
+from jaeger_client import Config
 import random
+import logging
 
 app = Flask(__name__)
-
-f = open('greetings.txt', 'r')
-greetings = f.readlines()
-f.close()
-
-@app.route('/')
-def index():
-    tracer = init_tracer('greeting-service')
-    getGreeter(tracer)
-
-def getGreeter(tracer):
-    span_ctx = tracer.extract(Format.HTTP_HEADERS, request.headers)
-    span_tags = {tags.SPAN_KIND: tags.SPAN_KIND_RPC_SERVER}
-    with tracer.start_active_span('get-greeting', child_of=span_ctx, tags=span_tags):
-        return random.choice(greetings).strip()
 
 def init_tracer(service):
     logging.getLogger('').handlers = []
@@ -37,6 +24,19 @@ def init_tracer(service):
         service_name=service,
     )
     return config.initialize_tracer()
+
+tracer = init_tracer('greeting-service')
+
+f = open('greetings.txt', 'r')
+greetings = f.readlines()
+f.close()
+
+@app.route('/')
+def index():
+    span_ctx = tracer.extract(Format.HTTP_HEADERS, request.headers)
+    span_tags = {tags.SPAN_KIND: tags.SPAN_KIND_RPC_SERVER}
+    with tracer.start_span('get-greeting', child_of=span_ctx, tags=span_tags):
+        return random.choice(greetings).strip()
 
 if __name__ == '__main__':
     monitor(app, port=8000)
