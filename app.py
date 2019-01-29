@@ -6,8 +6,11 @@ from opentracing.propagation import Format
 from jaeger_client import Config
 import random
 import logging
+import sys
 
 app = Flask(__name__)
+app.logger.addHandler(logging.StreamHandler(sys.stdout))
+app.logger.setLevel(logging.DEBUG)
 
 def init_tracer(service):
     logging.getLogger('').handlers = []
@@ -36,7 +39,9 @@ def index():
     span_ctx = tracer.extract(Format.HTTP_HEADERS, request.headers)
     span_tags = {tags.SPAN_KIND: tags.SPAN_KIND_RPC_SERVER}
     with tracer.start_span('get-greeting', child_of=span_ctx, tags=span_tags):
-        return random.choice(greetings).strip()
+        greeting = random.choice(greetings).strip()
+        app.logger.debug('GREETING: ' + greeting)
+        return greeting
 
 if __name__ == '__main__':
     monitor(app, port=8000)
