@@ -39,10 +39,28 @@ def index():
     span_ctx = tracer.extract(Format.HTTP_HEADERS, request.headers)
     span_tags = {tags.SPAN_KIND: tags.SPAN_KIND_RPC_SERVER}
     with tracer.start_span('get-greeting', child_of=span_ctx, tags=span_tags):
+        global misbehave
         greeting = random.choice(greetings).strip()
         app.logger.debug('GREETING: ' + greeting)
+        app.logger.debug('MISBEHAVE: %s', bool(misbehave))
+        if misbehave:
+            return "Unavailable", 503
+        
         return greeting
 
+@app.route('/misbehave')
+def misbehave():
+    global misbehave 
+    misbehave = True
+    return "Misbehaving"
+
+@app.route('/behave')
+def behave():
+    global misbehave 
+    misbehave = False
+    return "behaving"
+
 if __name__ == '__main__':
+    misbehave = False
     monitor(app, port=8000)
     app.run(host='0.0.0.0', port=8080)

@@ -1,9 +1,9 @@
 FROM python:alpine
-COPY app.py /app/ 
-COPY greetings.txt /app/
+RUN apk add --no-cache git
 COPY requirements.txt /app/
 WORKDIR /app
-RUN apk add --no-cache git
 RUN pip install -r requirements.txt
+COPY greetings.txt /app/
+COPY app.py /app/ 
 ENTRYPOINT ["python"]
 CMD ["app.py"]
