@@ -62,6 +62,10 @@ def behave():
 
 @app.route('/healthz')
 def healthz():
+    global misbehave
+    if misbehave:
+        return "Unavailable", 503
+        
     return "OK", 200
 
 if __name__ == '__main__':
