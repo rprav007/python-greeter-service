@@ -46,7 +46,7 @@ def index():
         if misbehave:
             return "Unavailable", 503
         
-        return greeting
+        return greeting, 200
 
 @app.route('/misbehave')
 def misbehave():
@@ -59,6 +59,10 @@ def behave():
     global misbehave 
     misbehave = False
     return "behaving"
+
+@app.route('/healthz')
+def healthz():
+    return "OK", 200
 
 if __name__ == '__main__':
     misbehave = False
