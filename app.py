@@ -7,6 +7,7 @@ from jaeger_client import Config
 import random
 import logging
 import sys
+import time
 
 app = Flask(__name__)
 app.logger.addHandler(logging.StreamHandler(sys.stdout))
@@ -40,6 +41,10 @@ def index():
     span_tags = {tags.SPAN_KIND: tags.SPAN_KIND_RPC_SERVER}
     with tracer.start_span('get-greeting', child_of=span_ctx, tags=span_tags):
         global misbehave
+        global delay
+        
+        time.sleep(int(delay))
+        
         greeting = random.choice(greetings).strip()
         app.logger.debug('GREETING: ' + greeting)
         app.logger.debug('MISBEHAVE: %s', bool(misbehave))
@@ -65,10 +70,17 @@ def healthz():
     global misbehave
     if misbehave:
         return "Unavailable", 503
-        
+
     return "OK", 200
+
+@app.route('/setDelay')
+def setDelay():
+    global delay
+    delay = request.args.get("delay")
+    return 'delay set for {0}'.format(delay)
 
 if __name__ == '__main__':
     misbehave = False
+    delay = 0
     monitor(app, port=8000)
     app.run(host='0.0.0.0', port=8080)
