@@ -1,0 +1,29 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: greeter-service
+spec:
+  host: greeter-service
+  subsets:
+    - name: production
+      labels: 
+        version: production
+      trafficPolicy:
+        connectionPool:
+          tcp:
+            maxConnections: 1
+        outlierDetection:
+          consecutiveErrors: 7
+          interval: 5s
+          baseEjectionTime: 15m
+    - name: canary
+      labels:
+        version: canary
+      trafficPolicy:
+        connectionPool:
+          tcp:
+            maxConnections: 1
+        outlierDetection:
+          consecutiveErrors: 7
+          interval: 5s
+          baseEjectionTime: 15m
