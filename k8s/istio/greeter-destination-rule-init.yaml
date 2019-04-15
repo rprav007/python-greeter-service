@@ -8,6 +8,6 @@ spec:
     - name: production
       labels: 
         version: production
-    - name: canary
-      labels:
-        version: canary
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL  
