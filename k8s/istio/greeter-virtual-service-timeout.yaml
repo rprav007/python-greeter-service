@@ -6,11 +6,11 @@ spec:
   hosts:
   - greeter-service
   http:
-    - route:
-      - destination:
-          host: greeter-service
-          port:
-            number: 8080
-          subset: production
-        weight: 100
-      timeout: 0.100s
+  - route:
+    - destination:
+        host: greeter-service
+        port:
+          number: 8080
+        subset: production
+      weight: 100
+    timeout: 0.100s
